@@ -47,6 +47,7 @@ def _eci2ecef(posix):
 	return R
 
 def _ecef2lla(ecef):
+	# source: https://www.mathworks.com/matlabcentral/fileexchange/7941-convert-cartesian--ecef--coordinates-to-lat--lon--alt
 	x = ecef[0,0]
 	y = ecef[1,0]
 	z = ecef[2,0]
