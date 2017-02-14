@@ -106,7 +106,7 @@ def _est_ecef(theta1, theta2, r_sun1, r_sun2):
 	r_sun2y = r_sun2[1,0]
 	r_sun2z = r_sun2[2,0]
 
-	theat1 = cos(pi/2 - theta1)
+	theta1 = cos(pi/2 - theta1)
 	theta2 = cos(pi/2 - theta2)
 
 	# dump from solve_eqs.py
