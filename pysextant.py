@@ -84,11 +84,11 @@ def est_lla(theta1, theta2, posix_1, posix_2):
 	R_eci2ecef = _eci2ecef(posix_2)
 	r_sun2 = R_eci2ecef*r_sun_eci
 
-	r_me = _est_ecef(theta1, theta2, r_sun1, r_sun2)
+	(r_me1, r_me2) = _est_ecef(theta1, theta2, r_sun1, r_sun2)
 
 	a = 6378137
-	r_ecef1 = np.transpose(r_me[0,:]*a)
-	r_ecef2 = np.transpose(r_me[1,:]*a)
+	r_ecef1 = r_me1*a
+	r_ecef2 = r_me2*a
 
 	lla1 = _ecef2lla(r_ecef1)
 	lla2 = _ecef2lla(r_ecef2)
@@ -100,18 +100,24 @@ def est_lla(theta1, theta2, posix_1, posix_2):
 
 
 def _est_ecef(theta1, theta2, r_sun1, r_sun2):
-	r_sun1x = r_sun1[0,0]
-	r_sun1y = r_sun1[1,0]
-	r_sun1z = r_sun1[2,0]
-	r_sun2x = r_sun2[0,0]
-	r_sun2y = r_sun2[1,0]
-	r_sun2z = r_sun2[2,0]
 
-	theta1 = cos(pi/2 - theta1)
-	theta2 = cos(pi/2 - theta2)
+	a1 = cos(pi/2 - theta1)
+	a2 = cos(pi/2 - theta2)
 
-	# dump from solve_eqs.py
-	r_me = \
-	np.matrix([((-r_sun1x*r_sun1y*r_sun2y*theta2 - r_sun1x*r_sun1z*r_sun2z*theta2 + r_sun1x*r_sun2y**2*theta1 + r_sun1x*r_sun2z**2*theta1 + r_sun1y**2*r_sun2x*theta2 - r_sun1y*r_sun2x*r_sun2y*theta1 - r_sun1y*r_sun2z*sqrt(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - r_sun1x**2*theta2**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + 2*r_sun1x*r_sun2x*theta1*theta2 + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - r_sun1y**2*theta2**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + 2*r_sun1y*r_sun2y*theta1*theta2 + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2 - r_sun1z**2*theta2**2 + 2*r_sun1z*r_sun2z*theta1*theta2 - r_sun2x**2*theta1**2 - r_sun2y**2*theta1**2 - r_sun2z**2*theta1**2) + r_sun1z**2*r_sun2x*theta2 - r_sun1z*r_sun2x*r_sun2z*theta1 + r_sun1z*r_sun2y*sqrt(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - r_sun1x**2*theta2**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + 2*r_sun1x*r_sun2x*theta1*theta2 + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - r_sun1y**2*theta2**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + 2*r_sun1y*r_sun2y*theta1*theta2 + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2 - r_sun1z**2*theta2**2 + 2*r_sun1z*r_sun2z*theta1*theta2 - r_sun2x**2*theta1**2 - r_sun2y**2*theta1**2 - r_sun2z**2*theta1**2))/(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2), (r_sun1x**2*r_sun2y*theta2 - r_sun1x*r_sun1y*r_sun2x*theta2 - r_sun1x*r_sun2x*r_sun2y*theta1 + r_sun1x*r_sun2z*sqrt(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - r_sun1x**2*theta2**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + 2*r_sun1x*r_sun2x*theta1*theta2 + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - r_sun1y**2*theta2**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + 2*r_sun1y*r_sun2y*theta1*theta2 + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2 - r_sun1z**2*theta2**2 + 2*r_sun1z*r_sun2z*theta1*theta2 - r_sun2x**2*theta1**2 - r_sun2y**2*theta1**2 - r_sun2z**2*theta1**2) - r_sun1y*r_sun1z*r_sun2z*theta2 + r_sun1y*r_sun2x**2*theta1 + r_sun1y*r_sun2z**2*theta1 + r_sun1z**2*r_sun2y*theta2 - r_sun1z*r_sun2x*sqrt(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - r_sun1x**2*theta2**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + 2*r_sun1x*r_sun2x*theta1*theta2 + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - r_sun1y**2*theta2**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + 2*r_sun1y*r_sun2y*theta1*theta2 + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2 - r_sun1z**2*theta2**2 + 2*r_sun1z*r_sun2z*theta1*theta2 - r_sun2x**2*theta1**2 - r_sun2y**2*theta1**2 - r_sun2z**2*theta1**2) - r_sun1z*r_sun2y*r_sun2z*theta1)/(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2), (r_sun1x**2*r_sun2z*theta2 - r_sun1x*r_sun1z*r_sun2x*theta2 - r_sun1x*r_sun2x*r_sun2z*theta1 + r_sun1y**2*r_sun2z*theta2 - r_sun1y*r_sun1z*r_sun2y*theta2 - r_sun1y*r_sun2y*r_sun2z*theta1 + r_sun1z*r_sun2x**2*theta1 + r_sun1z*r_sun2y**2*theta1 + (-r_sun1x*r_sun2y + r_sun1y*r_sun2x)*sqrt(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - r_sun1x**2*theta2**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + 2*r_sun1x*r_sun2x*theta1*theta2 + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - r_sun1y**2*theta2**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + 2*r_sun1y*r_sun2y*theta1*theta2 + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2 - r_sun1z**2*theta2**2 + 2*r_sun1z*r_sun2z*theta1*theta2 - r_sun2x**2*theta1**2 - r_sun2y**2*theta1**2 - r_sun2z**2*theta1**2))/(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2)), ((-r_sun1x*r_sun1y*r_sun2y*theta2 - r_sun1x*r_sun1z*r_sun2z*theta2 + r_sun1x*r_sun2y**2*theta1 + r_sun1x*r_sun2z**2*theta1 + r_sun1y**2*r_sun2x*theta2 - r_sun1y*r_sun2x*r_sun2y*theta1 + r_sun1y*r_sun2z*sqrt(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - r_sun1x**2*theta2**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + 2*r_sun1x*r_sun2x*theta1*theta2 + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - r_sun1y**2*theta2**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + 2*r_sun1y*r_sun2y*theta1*theta2 + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2 - r_sun1z**2*theta2**2 + 2*r_sun1z*r_sun2z*theta1*theta2 - r_sun2x**2*theta1**2 - r_sun2y**2*theta1**2 - r_sun2z**2*theta1**2) + r_sun1z**2*r_sun2x*theta2 - r_sun1z*r_sun2x*r_sun2z*theta1 - r_sun1z*r_sun2y*sqrt(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - r_sun1x**2*theta2**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + 2*r_sun1x*r_sun2x*theta1*theta2 + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - r_sun1y**2*theta2**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + 2*r_sun1y*r_sun2y*theta1*theta2 + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2 - r_sun1z**2*theta2**2 + 2*r_sun1z*r_sun2z*theta1*theta2 - r_sun2x**2*theta1**2 - r_sun2y**2*theta1**2 - r_sun2z**2*theta1**2))/(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2), (r_sun1x**2*r_sun2y*theta2 - r_sun1x*r_sun1y*r_sun2x*theta2 - r_sun1x*r_sun2x*r_sun2y*theta1 - r_sun1x*r_sun2z*sqrt(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - r_sun1x**2*theta2**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + 2*r_sun1x*r_sun2x*theta1*theta2 + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - r_sun1y**2*theta2**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + 2*r_sun1y*r_sun2y*theta1*theta2 + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2 - r_sun1z**2*theta2**2 + 2*r_sun1z*r_sun2z*theta1*theta2 - r_sun2x**2*theta1**2 - r_sun2y**2*theta1**2 - r_sun2z**2*theta1**2) - r_sun1y*r_sun1z*r_sun2z*theta2 + r_sun1y*r_sun2x**2*theta1 + r_sun1y*r_sun2z**2*theta1 + r_sun1z**2*r_sun2y*theta2 + r_sun1z*r_sun2x*sqrt(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - r_sun1x**2*theta2**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + 2*r_sun1x*r_sun2x*theta1*theta2 + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - r_sun1y**2*theta2**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + 2*r_sun1y*r_sun2y*theta1*theta2 + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2 - r_sun1z**2*theta2**2 + 2*r_sun1z*r_sun2z*theta1*theta2 - r_sun2x**2*theta1**2 - r_sun2y**2*theta1**2 - r_sun2z**2*theta1**2) - r_sun1z*r_sun2y*r_sun2z*theta1)/(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2), (r_sun1x**2*r_sun2z*theta2 - r_sun1x*r_sun1z*r_sun2x*theta2 - r_sun1x*r_sun2x*r_sun2z*theta1 + r_sun1y**2*r_sun2z*theta2 - r_sun1y*r_sun1z*r_sun2y*theta2 - r_sun1y*r_sun2y*r_sun2z*theta1 + r_sun1z*r_sun2x**2*theta1 + r_sun1z*r_sun2y**2*theta1 + (r_sun1x*r_sun2y - r_sun1y*r_sun2x)*sqrt(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - r_sun1x**2*theta2**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + 2*r_sun1x*r_sun2x*theta1*theta2 + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - r_sun1y**2*theta2**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + 2*r_sun1y*r_sun2y*theta1*theta2 + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2 - r_sun1z**2*theta2**2 + 2*r_sun1z*r_sun2z*theta1*theta2 - r_sun2x**2*theta1**2 - r_sun2y**2*theta1**2 - r_sun2z**2*theta1**2))/(r_sun1x**2*r_sun2y**2 + r_sun1x**2*r_sun2z**2 - 2*r_sun1x*r_sun1y*r_sun2x*r_sun2y - 2*r_sun1x*r_sun1z*r_sun2x*r_sun2z + r_sun1y**2*r_sun2x**2 + r_sun1y**2*r_sun2z**2 - 2*r_sun1y*r_sun1z*r_sun2y*r_sun2z + r_sun1z**2*r_sun2x**2 + r_sun1z**2*r_sun2y**2))])
+	r_sun1 = np.transpose(r_sun1)
+	r_sun2 = np.transpose(r_sun2)
+	b = np.cross(r_sun1, r_sun2)
+	d = np.cross(r_sun2*a1 - r_sun1*a2, b)/(np.vdot(b, b))
+	bd = np.vdot(b, d)
+	bb = np.vdot(b, b)
+	dd = np.vdot(d, d)
+	t1 = (-2*bd + sqrt(4*bd**2 - 4*bb*(dd-1)))/(2*bb)
+	t2 = (-2*bd - sqrt(4*bd**2 - 4*bb*(dd-1)))/(2*bb)
+	r_me1 = d+t1*b;
+	r_me2 = d+t2*b;
 
-	return r_me
+	r_me1 = np.transpose(r_me1)
+	r_me2 = np.transpose(r_me2)
+
+	
+	return (r_me1, r_me2)
